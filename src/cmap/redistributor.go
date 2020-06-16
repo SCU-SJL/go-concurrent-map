@@ -67,6 +67,9 @@ var bucketStatusTemplate = `Check bucket status:
     emptyBucketCount: %d
     bucketStatus: %d`
 
+// CheckBucketStatus will check the status of the given bucket.
+// Including Normal, Overweight and Underweight, however, we do not
+// react to status Underweight to avoid redundant resize actions.
 func (pr *pairRedistributorImpl) CheckBucketStatus(pairTotal uint64, bucketSize uint64) (bucketStatus BucketStatus) {
 	//defer func() {
 	//    fmt.Printf(bucketCountTemplate,
@@ -77,6 +80,7 @@ func (pr *pairRedistributorImpl) CheckBucketStatus(pairTotal uint64, bucketSize 
 	//        atomic.LoadUint64(&pr.emptyBucketCount),
 	//        bucketStatus)
 	//}()
+	bucketStatus = BucketStatusNormal
 	if bucketSize > DefaultBucketMaxSize || bucketSize >= atomic.LoadUint64(&pr.upperThreshold) {
 		atomic.AddUint64(&pr.overweightBucketCount, 1)
 		bucketStatus = BucketStatusOverweight
